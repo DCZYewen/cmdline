@@ -36,7 +36,31 @@
 #include <typeinfo>
 #include <cstring>
 #include <algorithm>
+/*
+There is some workarounds here. msvc doesn't provide 
+cxxabi.h, so we need to set up a condition.
+*/
+#ifndef _MSC_VER
 #include <cxxabi.h>
+namespace detail{
+    static inline std::string demangle(const std::string &name)
+  {
+    int status=0;
+    char *p=abi::__cxa_demangle(name.c_str(), 0, 0, &status);
+    std::string ret(p);
+    free(p);
+    return ret;
+  }
+}
+
+#else
+namespace detail{
+  static inline std::string demangle(const std::string &name)
+  {
+    return name;
+  }
+}
+#endif
 #include <cstdlib>
 
 namespace cmdline{
@@ -102,14 +126,6 @@ Target lexical_cast(const Source &arg)
   return lexical_cast_t<Target, Source, detail::is_same<Target, Source>::value>::cast(arg);
 }
 
-static inline std::string demangle(const std::string &name)
-{
-  int status=0;
-  char *p=abi::__cxa_demangle(name.c_str(), 0, 0, &status);
-  std::string ret(p);
-  free(p);
-  return ret;
-}
 
 template <class T>
 std::string readable_typename()
