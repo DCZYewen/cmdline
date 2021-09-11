@@ -10,6 +10,7 @@ This is a simple command line parser for C++.
 - Easy to use
 - Only one header file
 - Automatic type check
+- Working on MSVC toolset
 
 Sample
 ------
